@@ -1,2 +1,2 @@
-beyesianPy
+bayesianPy
 ==========
