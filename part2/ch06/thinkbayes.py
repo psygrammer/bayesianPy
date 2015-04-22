@@ -121,6 +121,7 @@ class _DictWrapper(object):
         hypos: sequence of hypotheses
         """
         self.name = name
+        self.label = name
         self.d = {}
 
         # flag whether the distribution is under a log transform
@@ -872,6 +873,7 @@ class Cdf(object):
         self.xs = [] if xs is None else xs
         self.ps = [] if ps is None else ps
         self.name = name
+        self.label = name
 
     def Copy(self, name=None):
         """Returns a copy of this Cdf.

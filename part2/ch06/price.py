@@ -243,8 +243,10 @@ def MakePlots(player1, player2):
     thinkplot.PrePlot(num=2)
     pmf1 = player1.PmfPrice()
     pmf1.name = 'showcase 1'
+    pmf1.label = pmf1.label
     pmf2 = player2.PmfPrice()
     pmf2.name = 'showcase 2'
+    pmf2.label = pmf2.name
     thinkplot.Pmfs([pmf1, pmf2])
     thinkplot.Save(root='price1',
                 xlabel='price ($)',
