@@ -1,0 +1,85 @@
+---
+title: "Bayesian Generalized Linear Models in R"
+author: "Sangyeol_lee"
+date: "Wednesday, April 08, 2015"
+output:
+  html_document:
+    keep_md: yes
+---
+###Reference : http://www.unt.edu/rss/class/Jon/R_SC/
+
+####Why not use MLE? : Overfitting
+####Why not use MAP? : No representive of our uncertainty
+####Why use Bayesian? : Optimize Loss Function
+
+####Bayesian methods focus on five essential elements.
+
+####'First', the incorporation of prior information (e.g.,expert opinion, a thorough literature review of the same or similar variables, and/or prior data). Prior information is generally specified quantitatively in the form of a distribution (e.g., normal/Gaussian, Poisson, binomial, etc.) 
+
+####'Second', the prior is combined with a likelihood function. The likelihood function represents the data Second, the prior is combined with a likelihood function. 
+
+####'Third', the combination of the prior with the likelihood function results in the creation of a posterior distribution of coefficient values.
+
+####'Fourth', simulates are drawn from the posterior distribution to create an empirical distribution of likely values for the population parameter.
+
+####'Fifth', basic statistics are used to summarize the empirical distribution of simulates from the posterior
+
+
+```{r}
+#traditional Ordinary Least Squares (OLS) regression, stepwise regression
+library(ISLR)
+data(Hitters)
+head(Hitters)
+Hitters=na.omit(Hitters)
+model.1 <- step(lm(Salary ~ ., data = Hitters, x = TRUE, y = TRUE),direction="backward")
+summary(model.1)
+confint(model.1)
+#But what does this really tell us?
+```
+
+```{r}
+#
+library(LearnBayes)
+#Gives a simulated sample from the joint posterior distribution of the regression vector and the error standard deviation for a linear regression model with a noninformative
+joint.posterior.samples <- blinreg(model.1$y, model.1$x, 5000)
+oldpar <- par(oma=c(0,0,3,0), mfrow=c(2,2))
+hist(joint.posterior.samples$beta[,1], main = "Intercept", xlab = "beta 0")
+hist(joint.posterior.samples$beta[,2], main = "AtBat", xlab = "beta 1")
+hist(joint.posterior.samples$beta[,3], main = "Hits", xlab = "beta 2")
+hist(joint.posterior.samples$beta[,4], main = "Walks", xlab = "beta 3")
+par(oldpar)
+```
+
+```{r}
+# To display the 95% credible intervals[Bayesian confidence interval:a posterior probability distribution used for interval estimation] (and medians) from the distributions, use an 'apply' function. 
+apply(joint.posterior.samples$beta, 2, quantile, c(.025, .500, .975))
+```
+
+```{r}
+library(arm)
+# Conduct the Bayesian Generalized linear model (here family = Gaussian, as is default).
+model.2 <- bayesglm(Salary~AtBat+Hits+Walks+CAtBat+CRuns+CRBI+CWalks+Division+PutOuts+Assists, family = "gaussian", data = Hitters, prior.scale=Inf, prior.df=Inf)
+summary(model.2)
+```
+
+```{r}
+simulates <- coef(sim(model.2))
+head(simulates)
+
+posterior.open <- simulates[,2]
+head(posterior.open)
+par(mfrow=c(1,1))
+hist(posterior.open)
+
+plot(density(posterior.open), main = "", xlab = "Posterior.open", ylab = "Density")
+
+# Retrieve the 95% credible interval for the open variable's coefficient.
+quantile(posterior.open, c(.025, .975))
+```
+
+```{r}
+library(MCMCpack)
+model.3 <- MCMCregress(Salary~AtBat+Hits+Walks+CAtBat+CRuns+CRBI+CWalks+Division+PutOuts+Assists, data = Hitters, burnin = 3000, mcmc = 10000, verbose = 1000, seed = NA, beta.start = NA)
+summary(model.3)
+plot(model.3)
+```
