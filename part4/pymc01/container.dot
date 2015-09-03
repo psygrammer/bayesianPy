@@ -1,7 +1,4 @@
 digraph G {
-beta;
 alpha;
-theta [shape=invtriangle];
-alpha -> theta  [label=a];
-beta -> theta  [label=b];
+beta;
 }
